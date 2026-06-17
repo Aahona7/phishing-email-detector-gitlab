@@ -281,3 +281,7 @@ def imap_fetch():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
+
+# Added suspicious URL analysis
+# Added improved suspicious URL analysis
