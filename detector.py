@@ -600,3 +600,6 @@ Provide your breakdown of the key threats concisely in 3-4 bullet points under t
         except Exception as e:
             # Fallback to local rule-based if LLM call fails
             return fallback_explanation + f"\n\n*(Failed to contact Gemini API: {str(e)}. Showing rule-based results instead.)*"
+
+
+# Added email parser improvements
