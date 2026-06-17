@@ -1,0 +1,7 @@
+Flask==3.0.2
+beautifulsoup4==4.12.3
+nltk==3.8.1
+google-generativeai==0.4.0
+dnspython==2.6.1
+python-dotenv==1.0.1
+pytest==8.0.2

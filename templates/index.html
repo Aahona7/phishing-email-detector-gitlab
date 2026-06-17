@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentryMail // Advanced Phishing Email Detector</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="glow-bg2"></div>
+
+    <header class="main-header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div class="logo-pulse"></div>
+            </div>
+            <div class="logo-text">
+                <h1>SENTRY<span>MAIL</span></h1>
+                <p>AI-Powered Phishing & Threat Analyzer</p>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <div class="api-key-container">
+                <i class="fa-solid fa-key api-key-icon"></i>
+                <input type="password" id="gemini-api-key" placeholder="Gemini API Key (Optional for AI Explanation)" />
+                <button class="tooltip-btn" title="Add a Gemini API key to enable advanced cyber-analyst explanations. Your key is stored locally in your browser session.">
+                    <i class="fa-solid fa-circle-question"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- LEFT COLUMN: INPUT CONTROLS -->
+        <section class="input-panel glass-card">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-file-import"></i> Email Source Selection</h2>
+                <p>Select how you want to ingest the email for security analysis.</p>
+            </div>
+            
+            <div class="tab-selectors">
+                <button class="tab-btn active" data-tab="paste-tab">
+                    <i class="fa-solid fa-keyboard"></i> Paste Text
+                </button>
+                <button class="tab-btn" data-tab="upload-tab">
+                    <i class="fa-solid fa-file-arrow-up"></i> Upload EML
+                </button>
+                <button class="tab-btn" data-tab="imap-tab">
+                    <i class="fa-solid fa-envelope-open-text"></i> Link Inbox (IMAP)
+                </button>
+            </div>
+
+            <div class="tab-contents">
+                <!-- PASTE TEXT TAB -->
+                <div class="tab-content active" id="paste-tab">
+                    <form id="paste-form" class="form-grid">
+                        <div class="input-group">
+                            <label for="from-header"><i class="fa-solid fa-user-tag"></i> From Header</label>
+                            <input type="text" id="from-header" placeholder="e.g. PayPal Security <support@paypa1-security.com>" />
+                        </div>
+                        <div class="input-group">
+                            <label for="subject-header"><i class="fa-solid fa-heading"></i> Subject</label>
+                            <input type="text" id="subject-header" placeholder="e.g. Action Required: Your account is suspended!" />
+                        </div>
+                        <div class="input-group full-width">
+                            <label for="email-body"><i class="fa-solid fa-paragraph"></i> Email Content (Body)</label>
+                            <textarea id="email-body" rows="12" placeholder="Paste the body of the email here. You can paste plain text or HTML. Include links if they exist in the email." required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn full-width">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Scan Email For Threats
+                        </button>
+                    </form>
+                </div>
+
+                <!-- UPLOAD FILE TAB -->
+                <div class="tab-content" id="upload-tab">
+                    <div class="upload-zone" id="drag-drop-zone">
+                        <input type="file" id="eml-file-input" accept=".eml" style="display: none;" />
+                        <div class="upload-icon">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3>Drag and Drop Email File</h3>
+                        <p>Supports standard <strong>.eml</strong> files exported from Outlook, Gmail, or Thunderbird.</p>
+                        <span class="or-divider">or</span>
+                        <button type="button" class="browse-btn" onclick="document.getElementById('eml-file-input').click()">Browse Files</button>
+                        <div class="selected-file-info" id="selected-file-name" style="display: none;">
+                            <i class="fa-solid fa-file-code"></i> <span>No file selected</span>
+                        </div>
+                    </div>
+                    <button type="button" id="upload-submit-btn" class="submit-btn full-width" disabled>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Uploaded File
+                    </button>
+                </div>
+
+                <!-- IMAP TAB -->
+                <div class="tab-content" id="imap-tab">
+                    <form id="imap-login-form" class="form-grid">
+                        <div class="input-group full-width">
+                            <label for="imap-preset"><i class="fa-solid fa-server"></i> Mail Provider Preset</label>
+                            <select id="imap-preset">
+                                <option value="custom">-- Custom IMAP Server --</option>
+                                <option value="imap.gmail.com">Gmail (Requires App Password)</option>
+                                <option value="outlook.office365.com">Outlook / Hotmail</option>
+                                <option value="imap.mail.yahoo.com">Yahoo Mail (Requires App Password)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="imap-host">IMAP Server Host</label>
+                            <input type="text" id="imap-host" placeholder="e.g. imap.example.com" required />
+                        </div>
+                        <div class="input-group">
+                            <label for="imap-port">Port (SSL)</label>
+                            <input type="number" id="imap-port" value="993" required />
+                        </div>
+                        <div class="input-group">
+                            <label for="imap-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                            <input type="email" id="imap-email" placeholder="e.g. user@gmail.com" required />
+                        </div>
+                        <div class="input-group">
+                            <label for="imap-password"><i class="fa-solid fa-lock"></i> Password / App Key</label>
+                            <input type="password" id="imap-password" placeholder="••••••••••••" required />
+                        </div>
+                        <button type="submit" class="submit-btn full-width" id="imap-connect-btn">
+                            <i class="fa-solid fa-circle-nodes"></i> Connect and Fetch Recent Mail
+                        </button>
+                    </form>
+
+                    <!-- IMAP Mail List (hidden until loaded) -->
+                    <div class="imap-mail-list-container" style="display: none;">
+                        <div class="list-header">
+                            <h3><i class="fa-solid fa-list-check"></i> Select Email to Analyze</h3>
+                            <button type="button" id="imap-disconnect-btn" class="text-btn"><i class="fa-solid fa-right-from-bracket"></i> Disconnect</button>
+                        </div>
+                        <div class="mail-table-wrapper">
+                            <table class="mail-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>From</th>
+                                        <th>Subject</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="imap-emails-body">
+                                    <!-- Dynamic email rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: RESULTS VIEW -->
+        <section class="results-panel glass-card" id="results-panel">
+            <!-- STATE 1: IDLE / NO RESULTS -->
+            <div class="results-state-idle" id="results-idle">
+                <div class="radar-container">
+                    <div class="radar-sweep"></div>
+                    <i class="fa-solid fa-shield-halved radar-icon"></i>
+                </div>
+                <h3>SentryMail Threat Shield Active</h3>
+                <p>Provide an email source on the left to begin inspecting for typosquatted domains, malicious URLs, urgent phishing syntax, and dangerous file payloads.</p>
+            </div>
+
+            <!-- STATE 2: SCANNING / RUNNING -->
+            <div class="results-state-scanning" id="results-scanning" style="display: none;">
+                <div class="spinner-container">
+                    <div class="scanner-circle"></div>
+                    <div class="scanner-circle-inner"></div>
+                    <i class="fa-solid fa-user-shield scanner-icon"></i>
+                </div>
+                <h3 id="scanner-status">Deconstructing Email...</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="scanner-progress"></div>
+                </div>
+                <div class="scan-logs" id="scan-logs">
+                    <div class="scan-log-item active"><i class="fa-solid fa-circle-notch fa-spin"></i> Initializing threat database...</div>
+                </div>
+            </div>
+
+            <!-- STATE 3: COMPLETE / DISPLAY THREATS -->
+            <div class="results-state-complete" id="results-complete" style="display: none;">
+                
+                <!-- Main Header: Score and Summary -->
+                <div class="results-header-summary">
+                    <div class="threat-gauge-panel">
+                        <div class="gauge-container">
+                            <svg class="gauge" viewBox="0 0 100 50">
+                                <path class="gauge-bg" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke-width="8"></path>
+                                <path class="gauge-fill" id="gauge-fill-arc" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke-width="8" stroke-dasharray="125.6" stroke-dashoffset="125.6"></path>
+                            </svg>
+                            <div class="gauge-labels">
+                                <span class="gauge-score" id="result-score-val">0</span>
+                                <span class="gauge-max">/100</span>
+                            </div>
+                        </div>
+                        <div class="gauge-threat-label" id="result-threat-badge">Safe</div>
+                    </div>
+
+                    <div class="meta-card">
+                        <div class="meta-row">
+                            <span class="meta-label">Subject:</span>
+                            <span class="meta-val" id="result-meta-subject">No Subject</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Sender:</span>
+                            <span class="meta-val" id="result-meta-sender">Unknown</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Timestamp:</span>
+                            <span class="meta-val" id="result-meta-date">N/A</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LLM AI EXPLANATION BOX -->
+                <div class="ai-explanation-card">
+                    <div class="ai-card-header">
+                        <div class="ai-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                            <div class="ai-ping"></div>
+                        </div>
+                        <div class="ai-title">
+                            <h4>AI Security Analyst Report</h4>
+                            <p>Detailed threat explanation by Gemini LLM</p>
+                        </div>
+                    </div>
+                    <div class="ai-content markdown-body" id="result-ai-explanation">
+                        This email is suspicious because...
+                    </div>
+                </div>
+
+                <!-- MODULAR RESULTS TABS -->
+                <div class="modular-tabs">
+                    <button class="mod-tab-btn active" data-mod="mod-sender">
+                        <span class="badge" id="badge-sender"><i class="fa-solid fa-circle-check"></i></span> Sender Identity
+                    </button>
+                    <button class="mod-tab-btn" data-mod="mod-links">
+                        <span class="badge" id="badge-links"><i class="fa-solid fa-circle-check"></i></span> Links & URLs
+                    </button>
+                    <button class="mod-tab-btn" data-mod="mod-urgency">
+                        <span class="badge" id="badge-urgency"><i class="fa-solid fa-circle-check"></i></span> Urgent Tone
+                    </button>
+                    <button class="mod-tab-btn" data-mod="mod-attachments">
+                        <span class="badge" id="badge-attachments"><i class="fa-solid fa-circle-check"></i></span> Attachments
+                    </button>
+                </div>
+
+                <div class="modular-contents">
+                    <!-- SENDER IDENT DETAILS -->
+                    <div class="mod-content active" id="mod-sender">
+                        <div class="details-list" id="sender-details-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- LINKS DETAILS -->
+                    <div class="mod-content" id="mod-links">
+                        <div class="details-list" id="links-details-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- URGENCY DETAILS -->
+                    <div class="mod-content" id="mod-urgency">
+                        <div class="urgency-metrics-grid">
+                            <div class="metric-mini-card">
+                                <span class="val" id="nlp-metric-urgency">0</span>
+                                <span class="lbl">Urgency Keywords</span>
+                            </div>
+                            <div class="metric-mini-card">
+                                <span class="val" id="nlp-metric-credentials">0</span>
+                                <span class="lbl">Credential Triggers</span>
+                            </div>
+                            <div class="metric-mini-card">
+                                <span class="val" id="nlp-metric-financial">0</span>
+                                <span class="lbl">Financial Terms</span>
+                            </div>
+                        </div>
+                        <div class="details-list" id="urgency-details-container">
+                            <!-- Highlighted sentences populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- ATTACHMENT DETAILS -->
+                    <div class="mod-content" id="mod-attachments">
+                        <div class="details-list" id="attachments-details-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INTEGRATED CONTENT VIEWER -->
+                <div class="email-viewer-section">
+                    <div class="viewer-header">
+                        <h3><i class="fa-solid fa-eye"></i> Email Content Inspected</h3>
+                        <div class="viewer-tabs">
+                            <button class="view-tab-btn active" data-view="view-text">Plain Text</button>
+                            <button class="view-tab-btn" data-view="view-html">HTML Body</button>
+                        </div>
+                    </div>
+                    <div class="viewer-body">
+                        <div class="view-content active" id="view-text">
+                            <pre id="email-raw-text-content"></pre>
+                        </div>
+                        <div class="view-content" id="view-html">
+                            <div class="html-iframe-wrapper">
+                                <iframe id="email-html-iframe" sandbox="allow-same-origin"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCAN ANOTHER BUTTON -->
+                <button type="button" class="reset-scan-btn" id="reset-scan-btn">
+                    <i class="fa-solid fa-rotate-left"></i> Analyze Another Email
+                </button>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>SentryMail v1.0.0 // Local Security Assessment Tool // Secure Sandboxed Scanning</p>
+    </footer>
+
+    <!-- Main JavaScript Logic -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
