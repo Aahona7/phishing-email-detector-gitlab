@@ -620,7 +620,3 @@ Deletes a stash entry.
 
 
 
-
-
-
-
